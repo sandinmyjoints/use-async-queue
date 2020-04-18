@@ -1,0 +1,33 @@
+{
+  "name": "use-concurrent-queue",
+  "version": "1.0.0",
+  "source": "use-concurrent-queue.js",
+  "main": "dist/use-concurrent-queue.js",
+  "module": "dist/use-concurrent-queue.module.js",
+  "author": "William Bert <william.bert@gmail.com>",
+  "license": "ISC",
+  "scripts": {
+    "build": "microbundle",
+    "dev": "microbundle watch",
+    "lint": "eslint use-concurrent-queue.*.js",
+    "test": "jest --config=jest.config.js"
+  },
+  "devDependencies": {
+    "@babel/core": "7.9.0",
+    "@babel/preset-env": "7.9.5",
+    "@testing-library/react-hooks": "3.2.1",
+    "babel-jest": "25.3.0",
+    "eslint": "6.8.0",
+    "eslint-plugin-jest": "23.8.2",
+    "eslint-plugin-react": "7.19.0",
+    "eslint-plugin-react-hooks": "3.0.0",
+    "jest": "25.3.0",
+    "microbundle": "0.11.0",
+    "prettier": "2.0.4",
+    "react-test-renderer": "16.13.1"
+  },
+  "dependencies": {
+    "react": "^16.9.1",
+    "react-use": "14.1.1"
+  }
+}

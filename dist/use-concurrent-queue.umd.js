@@ -1,0 +1,2 @@
+!function(e,n){"object"==typeof exports&&"undefined"!=typeof module?module.exports=n(require("react")):"function"==typeof define&&define.amd?define(["react"],n):e.useConcurrentQueue=n(e.react)}(this,function(e){return function(){var n=e.useState(0),t=n[1];return{count:n[0],increment:e.useCallback(function(){return t(function(e){return e+1})},[])}}});
+//# sourceMappingURL=use-concurrent-queue.umd.js.map
