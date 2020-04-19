@@ -1,11 +1,11 @@
 import { renderHook, act } from '@testing-library/react-hooks';
-import useConcurrentQueue from './use-concurrent-queue';
+import useAsyncQueue from './use-async-queue';
 
 describe('useConcurrentQueue', () => {
   describe('real timers', () => {
     it('should initialize it', () => {
       const { result } = renderHook(() =>
-        useConcurrentQueue({ concurrency: 1 })
+        useAsyncQueue({ concurrency: 1 })
       );
       expect(typeof result.current.add).toBe('function');
     });
@@ -20,7 +20,7 @@ describe('useConcurrentQueue', () => {
         },
       };
       const { result, waitForNextUpdate } = renderHook(() =>
-        useConcurrentQueue({ concurrency: 1, done })
+        useAsyncQueue({ concurrency: 1, done })
       );
 
       expect(done).not.toHaveBeenCalled();
@@ -52,7 +52,7 @@ describe('useConcurrentQueue', () => {
         };
       };
       const { result, waitForNextUpdate } = renderHook(() =>
-        useConcurrentQueue({ concurrency: 1, done })
+        useAsyncQueue({ concurrency: 1, done })
       );
 
       expect(done).not.toHaveBeenCalled();
@@ -83,7 +83,7 @@ describe('useConcurrentQueue', () => {
         };
       };
       const { result, waitForNextUpdate } = renderHook(() =>
-        useConcurrentQueue({ concurrency: 1, done })
+        useAsyncQueue({ concurrency: 1, done })
       );
 
       expect(done).not.toHaveBeenCalled();
@@ -115,7 +115,7 @@ describe('useConcurrentQueue', () => {
         };
       };
       const { result, waitForNextUpdate } = renderHook(() =>
-        useConcurrentQueue({ concurrency: 1, done })
+        useAsyncQueue({ concurrency: 1, done })
       );
 
       expect(done).not.toHaveBeenCalled();
@@ -153,7 +153,7 @@ describe('useConcurrentQueue', () => {
         };
       };
       const { result, waitForNextUpdate } = renderHook(() =>
-        useConcurrentQueue({ concurrency: 1, done })
+        useAsyncQueue({ concurrency: 1, done })
       );
 
       expect(done).not.toHaveBeenCalled();
@@ -201,7 +201,7 @@ describe('useConcurrentQueue', () => {
         };
       };
       const { result, waitForNextUpdate } = renderHook(() =>
-        useConcurrentQueue({ concurrency: 2, done })
+        useAsyncQueue({ concurrency: 2, done })
       );
 
       expect(done).not.toHaveBeenCalled();

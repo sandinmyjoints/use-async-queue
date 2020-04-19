@@ -1,15 +1,15 @@
 {
-  "name": "use-concurrent-queue",
+  "name": "use-async-queue",
   "version": "1.0.0",
-  "source": "use-concurrent-queue.js",
-  "main": "dist/use-concurrent-queue.js",
-  "module": "dist/use-concurrent-queue.module.js",
+  "source": "use-async-queue.js",
+  "main": "dist/use-async-queue.js",
+  "module": "dist/use-async-queue.module.js",
   "author": "William Bert <william.bert@gmail.com>",
   "license": "ISC",
   "scripts": {
     "build": "microbundle",
     "dev": "microbundle watch",
-    "lint": "eslint use-concurrent-queue.*.js",
+    "lint": "eslint use-async-queue.*.js",
     "test": "jest --config=jest.config.js"
   },
   "devDependencies": {

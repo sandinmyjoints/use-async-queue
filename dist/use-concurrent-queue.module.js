@@ -1,2 +1,0 @@
-import{useCallback as r,useEffect as e}from"react";import{useQueue as n}from"react-use";export default function(o){var t=o.concurrency,a=o.done;t<1&&(t=1);var c=n(),i=n(),f=r(function(r){i.add(r)},[i]);return e(function(){for(var r=function(){var r=i.remove();c.add(r);var e=r.task();e.then(function(){c.remove(r),a(Object.assign({},r,{promise:e}))})};c.size<t&&i.size>0;)r()},[t,a,c,i]),{add:f}}
-//# sourceMappingURL=use-concurrent-queue.module.js.map

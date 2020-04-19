@@ -1,2 +1,0 @@
-var e=require("react"),r=require("react-use");module.exports=function(u){var n=u.concurrency,a=u.done;n<1&&(n=1);var c=r.useQueue(),o=r.useQueue(),t=e.useCallback(function(e){o.add(e)},[o]);return e.useEffect(function(){for(var e=function(){var e=o.remove();c.add(e);var r=e.task();r.then(function(){c.remove(e),a(Object.assign({},e,{promise:r}))})};c.size<n&&o.size>0;)e()},[n,a,c,o]),{add:t}};
-//# sourceMappingURL=use-concurrent-queue.js.map
