@@ -4,9 +4,7 @@ import useAsyncQueue from './use-async-queue';
 describe('useConcurrentQueue', () => {
   describe('real timers', () => {
     it('should initialize it', () => {
-      const { result } = renderHook(() =>
-        useAsyncQueue({ concurrency: 1 })
-      );
+      const { result } = renderHook(() => useAsyncQueue({ concurrency: 1 }));
       expect(typeof result.current.add).toBe('function');
     });
 
@@ -25,7 +23,7 @@ describe('useConcurrentQueue', () => {
 
       expect(done).not.toHaveBeenCalled();
       expect(result.current.numInFlight).toBe(0);
-      expect(result.current.numRemaining).toBe(0);
+      expect(result.current.numPending).toBe(0);
       expect(result.current.numDone).toBe(0);
       act(() => result.current.add(task));
       await waitForNextUpdate();
@@ -37,7 +35,7 @@ describe('useConcurrentQueue', () => {
       });
       expect(done.mock.calls[0][0].result).resolves.toBe('0 is done');
       expect(result.current.numInFlight).toBe(0);
-      expect(result.current.numRemaining).toBe(0);
+      expect(result.current.numPending).toBe(0);
       expect(result.current.numDone).toBe(1);
     });
 
@@ -158,7 +156,7 @@ describe('useConcurrentQueue', () => {
 
       expect(done).not.toHaveBeenCalled();
       expect(result.current.numInFlight).toBe(0);
-      expect(result.current.numRemaining).toBe(0);
+      expect(result.current.numPending).toBe(0);
       expect(result.current.numDone).toBe(0);
 
       act(() => result.current.add(makeTask(0)));
@@ -166,13 +164,13 @@ describe('useConcurrentQueue', () => {
       jest.advanceTimersByTime(900);
       expect(done).not.toHaveBeenCalled();
       expect(result.current.numInFlight).toBe(1);
-      expect(result.current.numRemaining).toBe(1);
+      expect(result.current.numPending).toBe(1);
       expect(result.current.numDone).toBe(0);
       jest.advanceTimersByTime(100);
       await waitForNextUpdate();
       expect(done).toHaveBeenCalledTimes(1);
       expect(result.current.numInFlight).toBe(1);
-      expect(result.current.numRemaining).toBe(0);
+      expect(result.current.numPending).toBe(0);
       expect(result.current.numDone).toBe(1);
       jest.advanceTimersByTime(900);
       expect(done).toHaveBeenCalledTimes(1);
@@ -180,7 +178,7 @@ describe('useConcurrentQueue', () => {
       await waitForNextUpdate();
       expect(done).toHaveBeenCalledTimes(2);
       expect(result.current.numInFlight).toBe(0);
-      expect(result.current.numRemaining).toBe(0);
+      expect(result.current.numPending).toBe(0);
       expect(result.current.numDone).toBe(2);
     });
 
@@ -211,13 +209,13 @@ describe('useConcurrentQueue', () => {
       jest.advanceTimersByTime(900);
       expect(done).not.toHaveBeenCalled();
       expect(result.current.numInFlight).toBe(2);
-      expect(result.current.numRemaining).toBe(0);
+      expect(result.current.numPending).toBe(0);
       expect(result.current.numDone).toBe(0);
       jest.advanceTimersByTime(100);
       await waitForNextUpdate();
       expect(done).toHaveBeenCalledTimes(2);
       expect(result.current.numInFlight).toBe(0);
-      expect(result.current.numRemaining).toBe(0);
+      expect(result.current.numPending).toBe(0);
       expect(result.current.numDone).toBe(2);
     });
   });
