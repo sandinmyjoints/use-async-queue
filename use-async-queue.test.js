@@ -9,6 +9,7 @@ describe('useConcurrentQueue', () => {
     });
 
     it('should run one immediate task', async () => {
+      const inflight = jest.fn();
       const done = jest.fn();
       const task = {
         id: 0,
@@ -18,7 +19,7 @@ describe('useConcurrentQueue', () => {
         },
       };
       const { result, waitForNextUpdate } = renderHook(() =>
-        useAsyncQueue({ concurrency: 1, done })
+        useAsyncQueue({ concurrency: 1, inflight, done })
       );
 
       expect(done).not.toHaveBeenCalled();
@@ -27,6 +28,11 @@ describe('useConcurrentQueue', () => {
       expect(result.current.numDone).toBe(0);
       act(() => result.current.add(task));
       await waitForNextUpdate();
+      expect(inflight).toHaveBeenCalledTimes(1);
+      expect(inflight.mock.calls[0][0]).toMatchObject({
+        id: 0,
+        task: expect.any(Function),
+      });
       expect(done).toHaveBeenCalledTimes(1);
       expect(done.mock.calls[0][0]).toMatchObject({
         id: 0,
@@ -135,6 +141,7 @@ describe('useConcurrentQueue', () => {
     });
 
     it('should run one deferred task at a time with concurrency 1', async () => {
+      const inflight = jest.fn();
       const done = jest.fn();
       const makeTask = (id) => {
         return {
@@ -151,7 +158,7 @@ describe('useConcurrentQueue', () => {
         };
       };
       const { result, waitForNextUpdate } = renderHook(() =>
-        useAsyncQueue({ concurrency: 1, done })
+        useAsyncQueue({ concurrency: 1, inflight, done })
       );
 
       expect(done).not.toHaveBeenCalled();
@@ -161,6 +168,9 @@ describe('useConcurrentQueue', () => {
 
       act(() => result.current.add(makeTask(0)));
       act(() => result.current.add(makeTask(1)));
+      expect(result.current.numPending).toBe(1);
+      expect(result.current.numInFlight).toBe(1);
+      expect(inflight).toHaveBeenCalledTimes(1);
       jest.advanceTimersByTime(900);
       expect(done).not.toHaveBeenCalled();
       expect(result.current.numInFlight).toBe(1);
@@ -169,6 +179,7 @@ describe('useConcurrentQueue', () => {
       jest.advanceTimersByTime(100);
       await waitForNextUpdate();
       expect(done).toHaveBeenCalledTimes(1);
+      expect(inflight).toHaveBeenCalledTimes(2);
       expect(result.current.numInFlight).toBe(1);
       expect(result.current.numPending).toBe(0);
       expect(result.current.numDone).toBe(1);
@@ -183,6 +194,7 @@ describe('useConcurrentQueue', () => {
     });
 
     it('should run two deferred tasks at a time with concurrency 2', async () => {
+      const inflight = jest.fn();
       const done = jest.fn();
       const makeTask = (id) => {
         return {
@@ -199,13 +211,17 @@ describe('useConcurrentQueue', () => {
         };
       };
       const { result, waitForNextUpdate } = renderHook(() =>
-        useAsyncQueue({ concurrency: 2, done })
+        useAsyncQueue({ concurrency: 2, inflight, done })
       );
 
       expect(done).not.toHaveBeenCalled();
 
       act(() => result.current.add(makeTask(0)));
       act(() => result.current.add(makeTask(1)));
+      expect(result.current.numPending).toBe(0);
+      expect(result.current.numInFlight).toBe(2);
+      expect(inflight).toHaveBeenCalledTimes(2);
+      expect(done).toHaveBeenCalledTimes(0);
       jest.advanceTimersByTime(900);
       expect(done).not.toHaveBeenCalled();
       expect(result.current.numInFlight).toBe(2);

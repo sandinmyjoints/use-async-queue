@@ -4,7 +4,11 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 task
 {id: string or number, task: function returning promise}
 */
-export default function useAsyncQueue({ concurrency = 8, done }) {
+export default function useAsyncQueue({
+  concurrency = 8,
+  done = () => {},
+  inflight = () => {},
+}) {
   if (concurrency < 1) concurrency = Infinity;
 
   const [numInFlight, setNumInFlight] = useState(0);
@@ -15,13 +19,6 @@ export default function useAsyncQueue({ concurrency = 8, done }) {
   const pending = useRef([]);
 
   useEffect(() => {
-    console.log(
-      'DEBUG: useEffect called',
-      numInFlight,
-      inFlight.current.length,
-      numPending,
-      pending.current.length
-    );
     while (
       inFlight.current.length < concurrency &&
       pending.current.length > 0
@@ -30,24 +27,23 @@ export default function useAsyncQueue({ concurrency = 8, done }) {
       setNumPending((n) => n - 1);
       inFlight.current.push(task);
       setNumInFlight((n) => n + 1);
+      inflight(task);
       const result = task.task();
       result
         .then(() => {
-          console.log('DEBUG: task resolved, calling done');
           inFlight.current.pop(task);
           setNumInFlight((n) => n - 1);
           setNumDone((n) => n + 1);
           done({ ...task, result });
         })
         .catch(() => {
-          console.log('DEBUG: task rejected, calling done');
           inFlight.current.pop(task);
           setNumInFlight((n) => n - 1);
           setNumDone((n) => n + 1);
           done({ ...task, result });
         });
     }
-  }, [concurrency, done, numPending, numInFlight]);
+  }, [concurrency, done, inflight, numPending, numInFlight]);
 
   const add = useCallback(
     (task) => {
