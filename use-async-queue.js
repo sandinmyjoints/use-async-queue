@@ -4,8 +4,8 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 task
 {id: string or number, task: function returning promise}
 */
-export default function useAsyncQueue({ concurrency, done }) {
-  if (concurrency < 1) concurrency = 1;
+export default function useAsyncQueue({ concurrency = 8, done }) {
+  if (concurrency < 1) concurrency = Infinity;
 
   const [numInFlight, setNumInFlight] = useState(0);
   const [numRemaining, setNumRemaining] = useState(0);
