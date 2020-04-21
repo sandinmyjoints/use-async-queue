@@ -18,6 +18,7 @@ module.exports = {
   },
   plugins: ['react', 'jest', 'react-hooks'],
   rules: {
+    'prettier/prettier': ['error', { singleQuote: true }],
     'react-hooks/rules-of-hooks': 'error',
     'react-hooks/exhaustive-deps': 'warn',
   },
