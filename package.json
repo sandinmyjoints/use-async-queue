@@ -5,6 +5,7 @@
   "main": "dist/use-async-queue.js",
   "module": "dist/use-async-queue.module.js",
   "author": "William Bert <william.bert@gmail.com>",
+  "url": "https://github.com/sandinmyjoints/use-async-queue",
   "license": "ISC",
   "scripts": {
     "build": "microbundle",

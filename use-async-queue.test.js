@@ -14,7 +14,6 @@ describe('useConcurrentQueue', () => {
       const task = {
         id: 0,
         task: () => {
-          console.log('DEBUG: task started');
           return Promise.resolve('0 is done');
         },
       };
@@ -111,7 +110,6 @@ describe('useConcurrentQueue', () => {
         return {
           id,
           task: () => {
-            console.log('DEBUG: task started');
             return new Promise((resolve) =>
               setTimeout(() => resolve(`${id} is done`), 1000 * (id + 1))
             );
@@ -147,10 +145,8 @@ describe('useConcurrentQueue', () => {
         return {
           id,
           task: () => {
-            console.log(`DEBUG: task ${id} started`);
             return new Promise((resolve) =>
               setTimeout(() => {
-                console.log(`${id} is done`);
                 resolve(`${id} is done`);
               }, 1000)
             );
@@ -200,10 +196,8 @@ describe('useConcurrentQueue', () => {
         return {
           id,
           task: () => {
-            console.log(`DEBUG: task ${id} started`);
             return new Promise((resolve) =>
               setTimeout(() => {
-                console.log(`${id} is done`);
                 resolve(`${id} is done`);
               }, 1000)
             );
