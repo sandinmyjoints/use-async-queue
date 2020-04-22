@@ -14,7 +14,7 @@ Inspired by
 - Add tasks to it. A task is an object with an `id` (some unique value that
   makes sense for your use case -- a number, a url, etc.) and a `task` (a
   function that returns a Promise).
-- Demo: https://codesandbox.io/s/use-async-queue-demo-53y89
+- **Demo: https://codesandbox.io/s/use-async-queue-demo-53y89**
 
 
 ``` javascript
