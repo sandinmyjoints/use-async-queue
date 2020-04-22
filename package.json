@@ -7,6 +7,13 @@
   "author": "William Bert <william.bert@gmail.com>",
   "url": "https://github.com/sandinmyjoints/use-async-queue",
   "license": "ISC",
+  "keywords": [
+    "react",
+    "hook",
+    "queue",
+    "async",
+    "concurrent"
+  ],
   "scripts": {
     "build": "microbundle",
     "dev": "microbundle watch",
