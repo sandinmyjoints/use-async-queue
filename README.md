@@ -16,13 +16,12 @@ Inspired by
   function that returns a Promise).
 - **Demo: https://codesandbox.io/s/use-async-queue-demo-53y89**
 
-
-``` javascript
+```javascript
 import useAsyncQueue from 'use-async-queue';
 
-const done = (task) => {
-  console.log(`fetched ${task.id}: ${task.result}`)
-}
+const done = task => {
+  console.log(`fetched ${task.id}: ${task.result}`);
+};
 
 const queue = useAsyncQueue({
   concurrency,
@@ -30,17 +29,17 @@ const queue = useAsyncQueue({
   done,
 });
 
-const { numInFlight, numPending, numDone } = queue;
+const { add, numInFlight, numPending, numDone } = queue;
 
-queue.add({id: url, task: () => fetch(url).then((res) => res.text()) })
+add({ id: url, task: () => fetch(url).then(res => res.text()) });
 ```
 
 ## TODO
 
-- [X] return numInFlight, numRemaining, numDone
-- [X] catch
-- [X] pending/inflight
-- [X] inflight callback
+- [x] return numInFlight, numRemaining, numDone
+- [x] catch
+- [x] pending/inflight
+- [x] inflight callback
 - [ ] timeouts
 - [ ] start, stop methods
 - [ ] drain callback
