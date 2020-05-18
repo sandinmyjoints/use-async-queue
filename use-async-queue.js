@@ -9,11 +9,7 @@ import { useState, useRef, useCallback, useEffect } from 'react';
  * @param {Function} done - Callback for when an item is finished being
  * processed.
  */
-export default function useAsyncQueue({
-  concurrency = 8,
-  done = () => {},
-  inflight = () => {},
-}) {
+export default function useAsyncQueue({ concurrency = 8, done, inflight }) {
   if (concurrency < 1) concurrency = Infinity;
 
   const [numInFlight, setNumInFlight] = useState(0);
@@ -32,20 +28,20 @@ export default function useAsyncQueue({
       setNumPending((n) => n - 1);
       inFlight.current.push(task);
       setNumInFlight((n) => n + 1);
-      inflight(task);
+      inflight && inflight(task);
       const result = task.task();
       result
         .then(() => {
           inFlight.current.pop(task);
           setNumInFlight((n) => n - 1);
           setNumDone((n) => n + 1);
-          done({ ...task, result });
+          done && done({ ...task, result });
         })
         .catch(() => {
           inFlight.current.pop(task);
           setNumInFlight((n) => n - 1);
           setNumDone((n) => n + 1);
-          done({ ...task, result });
+          done && done({ ...task, result });
         });
     }
   }, [concurrency, done, inflight, numPending, numInFlight]);
