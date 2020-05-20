@@ -24,26 +24,33 @@ const url = 'some url';
 
 const inflight = task => {
   console.log(`starting on ${task.id}`);
+  console.dir(stats); // { numPending: 0, numInFlight: 1, numDone: 0}
 };
 
 const done = task => {
   console.log(`fetched ${task.id}: ${task.result}`);
+  console.dir(stats); // { numPending: 0, numInFlight: 0, numDone: 1}
 };
 
 const drain = () => {
   console.log('all done');
+  console.dir(stats); // { numPending: 0, numInFlight: 0, numDone: 1}
 };
 
-const queue = useAsyncQueue({
+const { add, stats } = useAsyncQueue({
   concurrency: 4,
   inflight,
   done,
   drain,
 });
 
-const { add, stats } = queue;
-
-add({ id: url, task: () => fetch(url).then(res => res.text()) });
+add({
+  id: url,
+  task: () => {
+    return fetch(url).then(res => res.text());
+  },
+});
+console.dir(stats); // { numPending: 1, numInFlight: 0, numDone: 0}
 ```
 
 ## TODO
@@ -52,7 +59,7 @@ add({ id: url, task: () => fetch(url).then(res => res.text()) });
 - [x] catch
 - [x] pending/inflight
 - [x] inflight callback
+- [x] drain callback
 - [ ] timeouts
 - [ ] start, stop methods
-- [X] drain callback
 - [ ] use events instead of/in addition to callbacks
