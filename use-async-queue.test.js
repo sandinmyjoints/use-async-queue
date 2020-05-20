@@ -22,9 +22,9 @@ describe('useConcurrentQueue', () => {
       );
 
       expect(done).not.toHaveBeenCalled();
-      expect(result.current.numInFlight).toBe(0);
-      expect(result.current.numPending).toBe(0);
-      expect(result.current.numDone).toBe(0);
+      expect(result.current.stats.numInFlight).toBe(0);
+      expect(result.current.stats.numPending).toBe(0);
+      expect(result.current.stats.numDone).toBe(0);
       act(() => result.current.add(task));
       await waitForNextUpdate();
       expect(inflight).toHaveBeenCalledTimes(1);
@@ -39,9 +39,9 @@ describe('useConcurrentQueue', () => {
         result: expect.any(Promise),
       });
       expect(done.mock.calls[0][0].result).resolves.toBe('0 is done');
-      expect(result.current.numInFlight).toBe(0);
-      expect(result.current.numPending).toBe(0);
-      expect(result.current.numDone).toBe(1);
+      expect(result.current.stats.numInFlight).toBe(0);
+      expect(result.current.stats.numPending).toBe(0);
+      expect(result.current.stats.numDone).toBe(1);
     });
 
     it('should run two immediate tasks, both resolve', async () => {
@@ -73,6 +73,7 @@ describe('useConcurrentQueue', () => {
 
     it('should run two immediate tasks, one resolves, one rejects', async () => {
       const done = jest.fn();
+      const drain = jest.fn();
       const makeTask = (id) => {
         return {
           id,
@@ -86,10 +87,11 @@ describe('useConcurrentQueue', () => {
         };
       };
       const { result, waitForNextUpdate } = renderHook(() =>
-        useAsyncQueue({ concurrency: 1, done })
+        useAsyncQueue({ concurrency: 1, done, drain })
       );
 
       expect(done).not.toHaveBeenCalled();
+      expect(drain).not.toHaveBeenCalled();
       act(() => {
         result.current.add(makeTask(0));
       });
@@ -100,6 +102,7 @@ describe('useConcurrentQueue', () => {
       expect(done).toHaveBeenCalledTimes(2);
       expect(done.mock.calls[0][0].result).resolves.toBe('0 is done');
       expect(done.mock.calls[1][0].result).rejects.toBe('1 rejected');
+      expect(drain).toHaveBeenCalledTimes(1);
     });
 
     // This test uses a real timeout, but the call to useFakeTimers messes with
@@ -141,6 +144,7 @@ describe('useConcurrentQueue', () => {
     it('should run one deferred task at a time with concurrency 1', async () => {
       const inflight = jest.fn();
       const done = jest.fn();
+      const drain = jest.fn();
       const makeTask = (id) => {
         return {
           id,
@@ -154,39 +158,43 @@ describe('useConcurrentQueue', () => {
         };
       };
       const { result, waitForNextUpdate } = renderHook(() =>
-        useAsyncQueue({ concurrency: 1, inflight, done })
+        useAsyncQueue({ concurrency: 1, inflight, done, drain })
       );
 
       expect(done).not.toHaveBeenCalled();
-      expect(result.current.numInFlight).toBe(0);
-      expect(result.current.numPending).toBe(0);
-      expect(result.current.numDone).toBe(0);
+      expect(inflight).not.toHaveBeenCalled();
+      expect(drain).not.toHaveBeenCalled();
+      expect(result.current.stats.numInFlight).toBe(0);
+      expect(result.current.stats.numPending).toBe(0);
+      expect(result.current.stats.numDone).toBe(0);
 
       act(() => result.current.add(makeTask(0)));
       act(() => result.current.add(makeTask(1)));
-      expect(result.current.numPending).toBe(1);
-      expect(result.current.numInFlight).toBe(1);
+      expect(result.current.stats.numPending).toBe(1);
+      expect(result.current.stats.numInFlight).toBe(1);
       expect(inflight).toHaveBeenCalledTimes(1);
       jest.advanceTimersByTime(900);
       expect(done).not.toHaveBeenCalled();
-      expect(result.current.numInFlight).toBe(1);
-      expect(result.current.numPending).toBe(1);
-      expect(result.current.numDone).toBe(0);
+      expect(result.current.stats.numInFlight).toBe(1);
+      expect(result.current.stats.numPending).toBe(1);
+      expect(result.current.stats.numDone).toBe(0);
       jest.advanceTimersByTime(100);
       await waitForNextUpdate();
       expect(done).toHaveBeenCalledTimes(1);
       expect(inflight).toHaveBeenCalledTimes(2);
-      expect(result.current.numInFlight).toBe(1);
-      expect(result.current.numPending).toBe(0);
-      expect(result.current.numDone).toBe(1);
+      expect(drain).not.toHaveBeenCalled();
+      expect(result.current.stats.numInFlight).toBe(1);
+      expect(result.current.stats.numPending).toBe(0);
+      expect(result.current.stats.numDone).toBe(1);
       jest.advanceTimersByTime(900);
       expect(done).toHaveBeenCalledTimes(1);
       jest.advanceTimersByTime(100);
       await waitForNextUpdate();
       expect(done).toHaveBeenCalledTimes(2);
-      expect(result.current.numInFlight).toBe(0);
-      expect(result.current.numPending).toBe(0);
-      expect(result.current.numDone).toBe(2);
+      expect(result.current.stats.numInFlight).toBe(0);
+      expect(result.current.stats.numPending).toBe(0);
+      expect(result.current.stats.numDone).toBe(2);
+      expect(drain).toHaveBeenCalledTimes(1);
     });
 
     it('should run two deferred tasks at a time with concurrency 2', async () => {
@@ -212,21 +220,21 @@ describe('useConcurrentQueue', () => {
 
       act(() => result.current.add(makeTask(0)));
       act(() => result.current.add(makeTask(1)));
-      expect(result.current.numPending).toBe(0);
-      expect(result.current.numInFlight).toBe(2);
+      expect(result.current.stats.numPending).toBe(0);
+      expect(result.current.stats.numInFlight).toBe(2);
       expect(inflight).toHaveBeenCalledTimes(2);
       expect(done).toHaveBeenCalledTimes(0);
       jest.advanceTimersByTime(900);
       expect(done).not.toHaveBeenCalled();
-      expect(result.current.numInFlight).toBe(2);
-      expect(result.current.numPending).toBe(0);
-      expect(result.current.numDone).toBe(0);
+      expect(result.current.stats.numInFlight).toBe(2);
+      expect(result.current.stats.numPending).toBe(0);
+      expect(result.current.stats.numDone).toBe(0);
       jest.advanceTimersByTime(100);
       await waitForNextUpdate();
       expect(done).toHaveBeenCalledTimes(2);
-      expect(result.current.numInFlight).toBe(0);
-      expect(result.current.numPending).toBe(0);
-      expect(result.current.numDone).toBe(2);
+      expect(result.current.stats.numInFlight).toBe(0);
+      expect(result.current.stats.numPending).toBe(0);
+      expect(result.current.stats.numDone).toBe(2);
     });
   });
 });

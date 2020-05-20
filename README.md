@@ -19,17 +19,29 @@ Inspired by
 ```javascript
 import useAsyncQueue from 'use-async-queue';
 
+// Example shows a task fetching a url, but a task can be any operation.
+const url = 'some url';
+
+const inflight = task => {
+  console.log(`starting on ${task.id}`);
+};
+
 const done = task => {
   console.log(`fetched ${task.id}: ${task.result}`);
 };
 
+const drain = () => {
+  console.log('all done');
+};
+
 const queue = useAsyncQueue({
-  concurrency,
+  concurrency: 4,
   inflight,
   done,
+  drain,
 });
 
-const { add, numInFlight, numPending, numDone } = queue;
+const { add, stats } = queue;
 
 add({ id: url, task: () => fetch(url).then(res => res.text()) });
 ```
@@ -42,5 +54,5 @@ add({ id: url, task: () => fetch(url).then(res => res.text()) });
 - [x] inflight callback
 - [ ] timeouts
 - [ ] start, stop methods
-- [ ] drain callback
+- [X] drain callback
 - [ ] use events instead of/in addition to callbacks
