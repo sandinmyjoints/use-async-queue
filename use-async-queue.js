@@ -77,18 +77,15 @@ export default function useAsyncQueue({
     }
   }, [concurrency, done, drain, inflight, stats]);
 
-  const add = useCallback(
-    (task) => {
-      pending.current.push(task);
-      setStats((stats) => {
-        return {
-          ...stats,
-          numPending: stats.numPending + 1,
-        };
-      });
-    },
-    [pending]
-  );
+  const add = useCallback((task) => {
+    pending.current.push(task);
+    setStats((stats) => {
+      return {
+        ...stats,
+        numPending: stats.numPending + 1,
+      };
+    });
+  }, []);
 
   return { add, stats };
 }
