@@ -1,6 +1,6 @@
 {
   "name": "use-async-queue",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "source": "use-async-queue.js",
   "main": "dist/use-async-queue.js",
   "module": "dist/use-async-queue.module.js",
