@@ -24,6 +24,7 @@ export default function useAsyncQueue({
     numDone: 0,
   });
 
+  const drained = useRef(true);
   const inFlight = useRef([]);
   const pending = useRef([]);
 
@@ -32,14 +33,18 @@ export default function useAsyncQueue({
       stats.numDone > 0 &&
       drain &&
       inFlight.current.length === 0 &&
-      pending.current.length === 0
-    )
+      pending.current.length === 0 &&
+      !drained.current
+    ) {
+      drained.current = true;
       return drain();
+    }
 
     while (
       inFlight.current.length < concurrency &&
       pending.current.length > 0
     ) {
+      drained.current = false;
       const task = pending.current.shift();
       inFlight.current.push(task);
       setStats((stats) => {

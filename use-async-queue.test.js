@@ -86,10 +86,13 @@ describe('useConcurrentQueue', () => {
           },
         };
       };
-      const { result, waitForNextUpdate } = renderHook(() =>
-        useAsyncQueue({ concurrency: 1, done, drain })
+      const { result, rerender, waitForNextUpdate } = renderHook(
+        ({ concurrency, done, drain }) =>
+          useAsyncQueue({ concurrency, done, drain }),
+        { initialProps: { concurrency: 1, done, drain } }
       );
 
+      // TODO: separate drain testing into its own test case.
       expect(done).not.toHaveBeenCalled();
       expect(drain).not.toHaveBeenCalled();
       act(() => {
@@ -102,6 +105,10 @@ describe('useConcurrentQueue', () => {
       expect(done).toHaveBeenCalledTimes(2);
       expect(done.mock.calls[0][0].result).resolves.toBe('0 is done');
       expect(done.mock.calls[1][0].result).rejects.toBe('1 rejected');
+      expect(drain).toHaveBeenCalledTimes(1);
+      // Force re-calcuation by changing a prop.
+      rerender({ concurrency: 2, done, drain });
+      // Ensure drain isn't called again.
       expect(drain).toHaveBeenCalledTimes(1);
     });
 
