@@ -58,7 +58,7 @@ export default function useAsyncQueue({
       const result = task.task();
       result
         .then(() => {
-          inFlight.current.pop(task);
+          inFlight.current.pop();
           setStats((stats) => {
             return {
               ...stats,
@@ -69,7 +69,7 @@ export default function useAsyncQueue({
           done && done({ ...task, result, stats });
         })
         .catch(() => {
-          inFlight.current.pop(task);
+          inFlight.current.pop();
           setStats((stats) => {
             return {
               ...stats,
