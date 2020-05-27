@@ -16,6 +16,9 @@
   ],
   "scripts": {
     "build": "microbundle",
+    "prerelease": "yarn run build",
+    "preversion": "yarn run build",
+    "release": "np",
     "dev": "microbundle watch",
     "lint": "eslint use-async-queue.*.js",
     "test": "jest --config=jest.config.js"
@@ -33,6 +36,7 @@
     "eslint-plugin-react-hooks": "3.0.0",
     "jest": "25.3.0",
     "microbundle": "0.11.0",
+    "np": "6.2.3",
     "prettier": "2.0.4",
     "react-test-renderer": "16.13.1"
   },
