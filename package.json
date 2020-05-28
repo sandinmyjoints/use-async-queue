@@ -1,7 +1,7 @@
 {
   "name": "use-async-queue",
   "version": "2.0.5",
-  "source": "use-async-queue.js",
+  "source": "use-async-queue.ts",
   "main": "dist/use-async-queue.js",
   "module": "dist/use-async-queue.module.js",
   "author": "William Bert <william.bert@gmail.com>",

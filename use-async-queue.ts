@@ -1,22 +1,34 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import nextTick from 'next-tick';
 
-/**
- * Hook for managing a queue with limited concurrency.
- * @param {number} concurrency - Maximum number of tasks to process
- * concurrently. Default 8.
- * @param {Function} inflight - Callback when a task changes from pending to
- * being processed.
- * @param {Function} done - Callback when a task is done being processed.
- * @param {Function} drain - Callback when all tasks are done.
- * @returns {object} Returns an object that exposes `add` and `stats`.
- */
-export default function useAsyncQueue({
-  concurrency = 8,
-  done,
-  drain,
-  inflight,
-}) {
+interface QueueStats {
+  numPending: number;
+  numInFlight: number;
+  numDone: number;
+}
+
+interface QueueTaskResult {
+  id: any;
+  task(): Promise<any>;
+  result?: Promise<any>;
+  stats?: QueueStats;
+}
+
+interface Queue {
+  add: (task: QueueTaskResult) => void;
+  stats: QueueStats;
+}
+
+interface QueueOpts {
+  concurrency?: number;
+  done?: (result: QueueTaskResult) => void;
+  drain?: () => void;
+  inflight?: (task: QueueTaskResult) => void;
+}
+
+function useAsyncQueue(opts: QueueOpts): Queue {
+  const { done, drain, inflight } = opts;
+  let { concurrency } = opts;
   if (concurrency < 1) concurrency = Infinity;
 
   const [stats, setStats] = useState({
@@ -26,8 +38,8 @@ export default function useAsyncQueue({
   });
 
   const drained = useRef(true);
-  const inFlight = useRef([]);
-  const pending = useRef([]);
+  const inFlight = useRef([] as QueueTaskResult[]);
+  const pending = useRef([] as QueueTaskResult[]);
 
   useEffect(() => {
     if (
@@ -48,7 +60,7 @@ export default function useAsyncQueue({
       drained.current = false;
       const task = pending.current.shift();
       inFlight.current.push(task);
-      setStats((stats) => {
+      setStats(stats => {
         return {
           ...stats,
           numPending: stats.numPending - 1,
@@ -60,7 +72,7 @@ export default function useAsyncQueue({
       result
         .then(() => {
           inFlight.current.pop();
-          setStats((stats) => {
+          setStats(stats => {
             return {
               ...stats,
               numInFlight: stats.numInFlight - 1,
@@ -71,7 +83,7 @@ export default function useAsyncQueue({
         })
         .catch(() => {
           inFlight.current.pop();
-          setStats((stats) => {
+          setStats(stats => {
             return {
               ...stats,
               numInFlight: stats.numInFlight - 1,
@@ -83,9 +95,9 @@ export default function useAsyncQueue({
     }
   }, [concurrency, done, drain, inflight, stats]);
 
-  const add = useCallback((task) => {
+  const add = useCallback((task: QueueTaskResult) => {
     pending.current.push(task);
-    setStats((stats) => {
+    setStats(stats => {
       return {
         ...stats,
         numPending: stats.numPending + 1,
@@ -95,3 +107,5 @@ export default function useAsyncQueue({
 
   return { add, stats };
 }
+
+export default useAsyncQueue;
