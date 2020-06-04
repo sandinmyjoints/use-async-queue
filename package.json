@@ -41,6 +41,7 @@
     "react-test-renderer": "16.13.1"
   },
   "dependencies": {
+    "next-tick": "1.1.0",
     "react": "^16.9.1"
   }
 }
