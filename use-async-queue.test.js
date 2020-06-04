@@ -105,6 +105,7 @@ describe('useConcurrentQueue', () => {
       expect(done).toHaveBeenCalledTimes(2);
       expect(done.mock.calls[0][0].result).resolves.toBe('0 is done');
       expect(done.mock.calls[1][0].result).rejects.toBe('1 rejected');
+      // TODO: test that drain is not called until next tick.
       expect(drain).toHaveBeenCalledTimes(1);
       // Force re-calcuation by changing a prop.
       rerender({ concurrency: 2, done, drain });

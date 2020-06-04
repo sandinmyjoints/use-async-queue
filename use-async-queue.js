@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
+import nextTick from 'next-tick';
 
 /**
  * Hook for managing a queue with limited concurrency.
@@ -37,7 +38,7 @@ export default function useAsyncQueue({
       !drained.current
     ) {
       drained.current = true;
-      return drain();
+      return nextTick(drain);
     }
 
     while (
