@@ -6,6 +6,10 @@
   "module": "dist/use-async-queue.module.js",
   "author": "William Bert <william.bert@gmail.com>",
   "url": "https://github.com/sandinmyjoints/use-async-queue",
+  "homepage": "https://github.com/sandinmyjoints/use-async-queue",
+  "bugs": {
+    "url": "https://github.com/sandinmyjoints/use-async-queue/issues"
+  },
   "license": "ISC",
   "keywords": [
     "react",

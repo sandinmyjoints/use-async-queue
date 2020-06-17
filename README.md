@@ -1,16 +1,16 @@
 # use-async-queue
 
-A React Hook implementing a queue for sync or async tasks with optional
-concurrency limit. Default concurrency is 8. Set to `Infinity` or less than 1
-for no concurrency limit.
+A React Hook implementing a queue for sync or async tasks, with optional
+concurrency limit.
 
 Inspired by
 [@caolan/async.queue](http://caolan.github.io/async/docs.html#queue).
 
 ## Usage
 
-- Create a queue with some concurrency. Register for notifications as tasks
-  are processed and finished.
+- Create a queue with some concurrency. Default concurrency is 8. Set to
+  `Infinity` or less than 1 for no concurrency limit.
+- Register for notifications as tasks are processed and finished.
 - Add tasks to it. A task is an object with an `id` (some unique value that
   makes sense for your use case -- a number, a url, etc.) and a `task` (a
   function that returns a Promise).
@@ -23,12 +23,13 @@ import useAsyncQueue from 'use-async-queue';
 const url = 'some url';
 
 const inflight = task => {
-  console.log(`starting on ${task.id}`);
+  console.log(`starting ${task.id}`);
   console.dir(stats); // { numPending: 0, numInFlight: 1, numDone: 0}
 };
 
-const done = task => {
-  console.log(`fetched ${task.id}: ${task.result}`);
+const done = async task => {
+  const result = await task.result;
+  console.log(`finished ${task.id}: ${result}`);
   console.dir(stats); // { numPending: 0, numInFlight: 0, numDone: 1}
 };
 
@@ -38,7 +39,7 @@ const drain = () => {
 };
 
 const { add, stats } = useAsyncQueue({
-  concurrency: 4,
+  concurrency: 1,
   inflight,
   done,
   drain,
