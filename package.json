@@ -43,10 +43,13 @@
     "microbundle": "0.11.0",
     "np": "6.2.3",
     "prettier": "2.0.4",
+    "react": "^16.9.1",
     "react-test-renderer": "16.13.1"
   },
-  "dependencies": {
-    "next-tick": "1.1.0",
+  "peerDependencies": {
     "react": "^16.9.1"
+  },
+  "dependencies": {
+    "next-tick": "1.1.0"
   }
 }
