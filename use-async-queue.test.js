@@ -1,7 +1,7 @@
 import { renderHook, act } from "@testing-library/react-hooks";
 import useAsyncQueue from "./dist/use-async-queue";
 
-describe("useConcurrentQueue", () => {
+describe("useAsyncQueue", () => {
   describe("real timers", () => {
     it("should initialize it", () => {
       const { result } = renderHook(() => useAsyncQueue({ concurrency: 1 }));
