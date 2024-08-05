@@ -1,20 +1,46 @@
-import { renderHook, act } from '@testing-library/react-hooks';
-import useAsyncQueue from './dist/use-async-queue';
+import { renderHook, act } from "@testing-library/react-hooks";
+import useAsyncQueue from "./dist/use-async-queue";
 
-describe('useConcurrentQueue', () => {
-  describe('real timers', () => {
-    it('should initialize it', () => {
+describe("useConcurrentQueue", () => {
+  describe("real timers", () => {
+    it("should initialize it", () => {
       const { result } = renderHook(() => useAsyncQueue({ concurrency: 1 }));
-      expect(typeof result.current.add).toBe('function');
+      expect(typeof result.current.add).toBe("function");
     });
 
-    it('should run one immediate task', async () => {
+    it("should not add a task with the same id as an existing task", async () => {
+      const done = jest.fn();
+      const makeTask = (id) => {
+        return {
+          id,
+          task: () => {
+            return Promise.resolve(`${id} is done`);
+          },
+        };
+      };
+      const { result, waitForNextUpdate } = renderHook(() =>
+        useAsyncQueue({ concurrency: 1, done })
+      );
+
+      expect(done).not.toHaveBeenCalled();
+      act(() => {
+        result.current.add(makeTask(0));
+      });
+      act(() => {
+        result.current.add(makeTask(0));
+      });
+      await waitForNextUpdate();
+      expect(done).toHaveBeenCalledTimes(1);
+      expect(done.mock.calls[0][0].result).resolves.toBe("0 is done");
+    });
+
+    it("should run one immediate task", async () => {
       const inflight = jest.fn();
       const done = jest.fn();
       const task = {
         id: 0,
         task: () => {
-          return Promise.resolve('0 is done');
+          return Promise.resolve("0 is done");
         },
       };
       const { result, waitForNextUpdate } = renderHook(() =>
@@ -38,13 +64,13 @@ describe('useConcurrentQueue', () => {
         task: expect.any(Function),
         result: expect.any(Promise),
       });
-      expect(done.mock.calls[0][0].result).resolves.toBe('0 is done');
+      expect(done.mock.calls[0][0].result).resolves.toBe("0 is done");
       expect(result.current.stats.numInFlight).toBe(0);
       expect(result.current.stats.numPending).toBe(0);
       expect(result.current.stats.numDone).toBe(1);
     });
 
-    it('should run two immediate tasks, both resolve', async () => {
+    it("should run two immediate tasks, both resolve", async () => {
       const done = jest.fn();
       const makeTask = (id) => {
         return {
@@ -67,11 +93,11 @@ describe('useConcurrentQueue', () => {
       });
       await waitForNextUpdate();
       expect(done).toHaveBeenCalledTimes(2);
-      expect(done.mock.calls[0][0].result).resolves.toBe('0 is done');
-      expect(done.mock.calls[1][0].result).resolves.toBe('1 is done');
+      expect(done.mock.calls[0][0].result).resolves.toBe("0 is done");
+      expect(done.mock.calls[1][0].result).resolves.toBe("1 is done");
     });
 
-    it('should run two immediate tasks, one resolves, one rejects', async () => {
+    it("should run two immediate tasks, one resolves, one rejects", async () => {
       const done = jest.fn();
       const drain = jest.fn();
       const makeTask = (id) => {
@@ -103,8 +129,8 @@ describe('useConcurrentQueue', () => {
       });
       await waitForNextUpdate();
       expect(done).toHaveBeenCalledTimes(2);
-      expect(done.mock.calls[0][0].result).resolves.toBe('0 is done');
-      expect(done.mock.calls[1][0].result).rejects.toBe('1 rejected');
+      expect(done.mock.calls[0][0].result).resolves.toBe("0 is done");
+      expect(done.mock.calls[1][0].result).rejects.toBe("1 rejected");
       // TODO: test that drain is not called until next tick.
       expect(drain).toHaveBeenCalledTimes(1);
       // Force re-calcuation by changing a prop.
@@ -115,7 +141,7 @@ describe('useConcurrentQueue', () => {
 
     // This test uses a real timeout, but the call to useFakeTimers messes with
     // it.
-    it.skip('should run one deferred task', async () => {
+    it.skip("should run one deferred task", async () => {
       const done = jest.fn();
       const makeTask = (id) => {
         return {
@@ -140,16 +166,16 @@ describe('useConcurrentQueue', () => {
         task: expect.any(Function),
         result: expect.any(Promise),
       });
-      expect(done.mock.calls[0][0].result).resolves.toBe('0 is done');
+      expect(done.mock.calls[0][0].result).resolves.toBe("0 is done");
     });
   });
 
-  describe('fake timers', () => {
+  describe("fake timers", () => {
     beforeEach(() => {
       jest.useFakeTimers();
     });
 
-    it('should run one deferred task at a time with concurrency 1', async () => {
+    it("should run one deferred task at a time with concurrency 1", async () => {
       const inflight = jest.fn();
       const done = jest.fn();
       const drain = jest.fn();
@@ -205,7 +231,7 @@ describe('useConcurrentQueue', () => {
       expect(drain).toHaveBeenCalledTimes(1);
     });
 
-    it('should run two deferred tasks at a time with concurrency 2', async () => {
+    it("should run two deferred tasks at a time with concurrency 2", async () => {
       const inflight = jest.fn();
       const done = jest.fn();
       const makeTask = (id) => {

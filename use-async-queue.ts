@@ -1,5 +1,5 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
-import nextTick from 'next-tick';
+import { useState, useRef, useCallback, useEffect } from "react";
+import nextTick from "next-tick";
 
 interface QueueStats {
   numPending: number;
@@ -29,6 +29,7 @@ interface QueueOpts {
 function useAsyncQueue(opts: QueueOpts): Queue {
   const { done, drain, inflight } = opts;
   let { concurrency } = opts;
+  concurrency = concurrency || Infinity;
   if (concurrency < 1) concurrency = Infinity;
 
   const [stats, setStats] = useState({
@@ -54,55 +55,66 @@ function useAsyncQueue(opts: QueueOpts): Queue {
     }
 
     while (
-      inFlight.current.length < concurrency &&
+      inFlight.current.length < concurrency! &&
       pending.current.length > 0
     ) {
       drained.current = false;
       const task = pending.current.shift();
-      inFlight.current.push(task);
-      setStats(stats => {
-        return {
-          ...stats,
-          numPending: stats.numPending - 1,
-          numInFlight: stats.numInFlight + 1,
-        };
-      });
-      inflight && inflight({ ...task, stats });
-      const result = task.task();
-      result
-        .then(() => {
-          inFlight.current.pop();
-          setStats(stats => {
-            return {
-              ...stats,
-              numInFlight: stats.numInFlight - 1,
-              numDone: stats.numDone + 1,
-            };
-          });
-          done && done({ ...task, result, stats });
-        })
-        .catch(() => {
-          inFlight.current.pop();
-          setStats(stats => {
-            return {
-              ...stats,
-              numInFlight: stats.numInFlight - 1,
-              numDone: stats.numDone + 1,
-            };
-          });
-          done && done({ ...task, result, stats });
+      if (task) {
+        inFlight.current.push(task);
+        setStats((stats) => {
+          return {
+            ...stats,
+            numPending: stats.numPending - 1,
+            numInFlight: stats.numInFlight + 1,
+          };
         });
+        inflight && inflight({ ...task, stats });
+        const result = task.task();
+        result
+          .then(() => {
+            inFlight.current.pop();
+            setStats((stats) => {
+              return {
+                ...stats,
+                numInFlight: stats.numInFlight - 1,
+                numDone: stats.numDone + 1,
+              };
+            });
+            done && done({ ...task, result, stats });
+          })
+          .catch(() => {
+            inFlight.current.pop();
+            setStats((stats) => {
+              return {
+                ...stats,
+                numInFlight: stats.numInFlight - 1,
+                numDone: stats.numDone + 1,
+              };
+            });
+            done && done({ ...task, result, stats });
+          });
+      }
     }
   }, [concurrency, done, drain, inflight, stats]);
 
   const add = useCallback((task: QueueTaskResult) => {
-    pending.current.push(task);
-    setStats(stats => {
-      return {
-        ...stats,
-        numPending: stats.numPending + 1,
-      };
-    });
+    if (
+      !pending.current.find((t) => {
+        return t.id === task.id;
+      }) &&
+      !inFlight.current.find((t) => {
+        return t.id === task.id;
+      })
+    ) {
+      pending.current.push(task);
+      setStats((stats) => {
+        return {
+          ...stats,
+          numPending: stats.numPending + 1,
+        };
+      });
+    }
   }, []);
 
   return { add, stats };
