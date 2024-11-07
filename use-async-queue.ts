@@ -8,9 +8,9 @@ interface QueueStats {
 }
 
 interface QueueTaskResult {
-  id: any;
-  task(): Promise<any>;
-  result?: Promise<any>;
+  id: unknown;
+  task(): Promise<unknown>;
+  result?: Promise<unknown>;
   stats?: QueueStats;
 }
 
