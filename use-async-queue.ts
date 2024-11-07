@@ -35,7 +35,7 @@ function useAsyncQueue(opts: QueueOpts): Queue {
   const [stats, setStats] = useState({
     numPending: 0,
     numInFlight: 0,
-    numDone: 0
+    numDone: 0,
   });
 
   const drained = useRef(true);
@@ -62,11 +62,11 @@ function useAsyncQueue(opts: QueueOpts): Queue {
       const task = pending.current.shift();
       if (task) {
         inFlight.current.push(task);
-        setStats(stats => {
+        setStats((stats) => {
           return {
             ...stats,
             numPending: stats.numPending - 1,
-            numInFlight: stats.numInFlight + 1
+            numInFlight: stats.numInFlight + 1,
           };
         });
         inflight && inflight({ ...task, stats });
@@ -74,22 +74,22 @@ function useAsyncQueue(opts: QueueOpts): Queue {
         result
           .then(() => {
             inFlight.current.pop();
-            setStats(stats => {
+            setStats((stats) => {
               return {
                 ...stats,
                 numInFlight: stats.numInFlight - 1,
-                numDone: stats.numDone + 1
+                numDone: stats.numDone + 1,
               };
             });
             done && done({ ...task, result, stats });
           })
           .catch(() => {
             inFlight.current.pop();
-            setStats(stats => {
+            setStats((stats) => {
               return {
                 ...stats,
                 numInFlight: stats.numInFlight - 1,
-                numDone: stats.numDone + 1
+                numDone: stats.numDone + 1,
               };
             });
             done && done({ ...task, result, stats });
@@ -100,18 +100,18 @@ function useAsyncQueue(opts: QueueOpts): Queue {
 
   const add = useCallback((task: QueueTaskResult) => {
     if (
-      !pending.current.find(t => {
+      !pending.current.find((t) => {
         return t.id === task.id;
       }) &&
-      !inFlight.current.find(t => {
+      !inFlight.current.find((t) => {
         return t.id === task.id;
       })
     ) {
       pending.current.push(task);
-      setStats(stats => {
+      setStats((stats) => {
         return {
           ...stats,
-          numPending: stats.numPending + 1
+          numPending: stats.numPending + 1,
         };
       });
     }
