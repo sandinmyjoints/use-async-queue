@@ -30,7 +30,7 @@
   "devDependencies": {
     "@babel/core": "7.9.0",
     "@babel/preset-env": "7.9.5",
-    "@testing-library/react": "14.3.1",
+    "@testing-library/react": "15.0.7",
     "@types/jest": "25.2.3",
     "@types/next-tick": "1.0.0",
     "@typescript-eslint/eslint-plugin": "5.5.0",
