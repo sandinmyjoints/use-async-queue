@@ -89,19 +89,14 @@ describe("useAsyncQueue", () => {
       );
 
       expect(done).not.toHaveBeenCalled();
-      act(() => {
+      await act(async () => {
         result.current.add(makeTask(0));
       });
-      act(() => {
-        result.current.add(makeTask(1));
-      });
       await act(async () => {
-        await waitFor(() => {
-          expect(done).toHaveBeenCalledTimes(1);
-          expect(done.mock.calls[0][0].result).resolves.toBe("0 is done");
-        });
+        result.current.add(makeTask(1));
+        expect(done).toHaveBeenCalledTimes(1);
+        expect(done.mock.calls[0][0].result).resolves.toBe("0 is done");
       });
-
       await waitFor(() => {
         expect(done).toHaveBeenCalledTimes(2);
         expect(done.mock.calls[1][0].result).resolves.toBe("1 is done");
@@ -132,25 +127,20 @@ describe("useAsyncQueue", () => {
       // TODO: separate drain testing into its own test case.
       expect(done).not.toHaveBeenCalled();
       expect(drain).not.toHaveBeenCalled();
-      act(() => {
+      await act(async () => {
         result.current.add(makeTask(0));
       });
-      act(() => {
-        result.current.add(makeTask(1));
-      });
-
       await act(async () => {
-        await waitFor(() => {
-          expect(done).toHaveBeenCalledTimes(1);
-          expect(done.mock.calls[0][0].result).resolves.toBe("0 is done");
-          expect(drain).toHaveBeenCalledTimes(0);
-        });
+        expect(done).toHaveBeenCalledTimes(1);
+        expect(drain).toHaveBeenCalledTimes(1);
+        expect(done.mock.calls[0][0].result).resolves.toBe("0 is done");
+        result.current.add(makeTask(1));
       });
 
       await waitFor(() => {
         expect(done).toHaveBeenCalledTimes(2);
         expect(done.mock.calls[1][0].result).rejects.toBe("1 rejected");
-        expect(drain).toHaveBeenCalledTimes(1);
+        expect(drain).toHaveBeenCalledTimes(2);
       });
     });
 
