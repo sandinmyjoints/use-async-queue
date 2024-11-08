@@ -1,11 +1,14 @@
 import { renderHook, waitFor } from "@testing-library/react";
+import { StrictMode } from "react";
 import { act } from "react";
 import useAsyncQueue from "./dist/use-async-queue";
 
 describe("useAsyncQueue", () => {
   describe("real timers", () => {
     it("should initialize it", () => {
-      const { result } = renderHook(() => useAsyncQueue({ concurrency: 1 }));
+      const { result } = renderHook(() => useAsyncQueue({ concurrency: 1 }), {
+        wrapper: StrictMode,
+      });
       expect(typeof result.current.add).toBe("function");
     });
 
@@ -19,8 +22,9 @@ describe("useAsyncQueue", () => {
           },
         };
       };
-      const { result } = renderHook(() =>
-        useAsyncQueue({ concurrency: 1, done })
+      const { result } = renderHook(
+        () => useAsyncQueue({ concurrency: 1, done }),
+        { wrapper: StrictMode }
       );
 
       expect(done).not.toHaveBeenCalled();
@@ -45,8 +49,9 @@ describe("useAsyncQueue", () => {
           return Promise.resolve("0 is done");
         },
       };
-      const { result } = renderHook(() =>
-        useAsyncQueue({ concurrency: 1, inflight, done })
+      const { result } = renderHook(
+        () => useAsyncQueue({ concurrency: 1, inflight, done }),
+        { wrapper: StrictMode }
       );
 
       expect(done).not.toHaveBeenCalled();
@@ -84,8 +89,9 @@ describe("useAsyncQueue", () => {
           },
         };
       };
-      const { result } = renderHook(() =>
-        useAsyncQueue({ concurrency: 1, done })
+      const { result } = renderHook(
+        () => useAsyncQueue({ concurrency: 1, done }),
+        { wrapper: StrictMode }
       );
 
       expect(done).not.toHaveBeenCalled();
@@ -121,7 +127,7 @@ describe("useAsyncQueue", () => {
       const { result } = renderHook(
         ({ concurrency, done, drain }) =>
           useAsyncQueue({ concurrency, done, drain }),
-        { initialProps: { concurrency: 1, done, drain } }
+        { initialProps: { concurrency: 1, done, drain }, wrapper: StrictMode }
       );
 
       // TODO: separate drain testing into its own test case.
@@ -158,8 +164,9 @@ describe("useAsyncQueue", () => {
           },
         };
       };
-      const { result, waitForNextUpdate } = renderHook(() =>
-        useAsyncQueue({ concurrency: 1, done })
+      const { result, waitForNextUpdate } = renderHook(
+        () => useAsyncQueue({ concurrency: 1, done }),
+        { wrapper: StrictMode }
       );
 
       expect(done).not.toHaveBeenCalled();
@@ -196,8 +203,9 @@ describe("useAsyncQueue", () => {
           },
         };
       };
-      const { result } = renderHook(() =>
-        useAsyncQueue({ concurrency: 1, inflight, done, drain })
+      const { result } = renderHook(
+        () => useAsyncQueue({ concurrency: 1, inflight, done, drain }),
+        { wrapper: StrictMode }
       );
 
       expect(done).not.toHaveBeenCalled();
@@ -258,8 +266,9 @@ describe("useAsyncQueue", () => {
           },
         };
       };
-      const { result } = renderHook(() =>
-        useAsyncQueue({ concurrency: 2, inflight, done })
+      const { result } = renderHook(
+        () => useAsyncQueue({ concurrency: 2, inflight, done }),
+        { wrapper: StrictMode }
       );
 
       expect(done).not.toHaveBeenCalled();
