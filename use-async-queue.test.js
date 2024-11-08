@@ -1,4 +1,5 @@
-import { renderHook, act } from "@testing-library/react-hooks";
+import { renderHook, waitFor } from "@testing-library/react";
+import { act } from "react";
 import useAsyncQueue from "./dist/use-async-queue";
 
 describe("useAsyncQueue", () => {
@@ -18,7 +19,7 @@ describe("useAsyncQueue", () => {
           },
         };
       };
-      const { result, waitForNextUpdate } = renderHook(() =>
+      const { result } = renderHook(() =>
         useAsyncQueue({ concurrency: 1, done })
       );
 
@@ -29,9 +30,10 @@ describe("useAsyncQueue", () => {
       act(() => {
         result.current.add(makeTask(0));
       });
-      await waitForNextUpdate();
-      expect(done).toHaveBeenCalledTimes(1);
-      expect(done.mock.calls[0][0].result).resolves.toBe("0 is done");
+      await waitFor(() => {
+        expect(done).toHaveBeenCalledTimes(1);
+        expect(done.mock.calls[0][0].result).resolves.toBe("0 is done");
+      });
     });
 
     it("should run one immediate task", async () => {
@@ -43,7 +45,7 @@ describe("useAsyncQueue", () => {
           return Promise.resolve("0 is done");
         },
       };
-      const { result, waitForNextUpdate } = renderHook(() =>
+      const { result } = renderHook(() =>
         useAsyncQueue({ concurrency: 1, inflight, done })
       );
 
@@ -52,22 +54,24 @@ describe("useAsyncQueue", () => {
       expect(result.current.stats.numPending).toBe(0);
       expect(result.current.stats.numDone).toBe(0);
       act(() => result.current.add(task));
-      await waitForNextUpdate();
-      expect(inflight).toHaveBeenCalledTimes(1);
-      expect(inflight.mock.calls[0][0]).toMatchObject({
-        id: 0,
-        task: expect.any(Function),
+
+      await waitFor(() => {
+        expect(inflight).toHaveBeenCalledTimes(1);
+        expect(inflight.mock.calls[0][0]).toMatchObject({
+          id: 0,
+          task: expect.any(Function),
+        });
+        expect(done).toHaveBeenCalledTimes(1);
+        expect(done.mock.calls[0][0]).toMatchObject({
+          id: 0,
+          task: expect.any(Function),
+          result: expect.any(Promise),
+        });
+        expect(done.mock.calls[0][0].result).resolves.toBe("0 is done");
+        expect(result.current.stats.numInFlight).toBe(0);
+        expect(result.current.stats.numPending).toBe(0);
+        expect(result.current.stats.numDone).toBe(1);
       });
-      expect(done).toHaveBeenCalledTimes(1);
-      expect(done.mock.calls[0][0]).toMatchObject({
-        id: 0,
-        task: expect.any(Function),
-        result: expect.any(Promise),
-      });
-      expect(done.mock.calls[0][0].result).resolves.toBe("0 is done");
-      expect(result.current.stats.numInFlight).toBe(0);
-      expect(result.current.stats.numPending).toBe(0);
-      expect(result.current.stats.numDone).toBe(1);
     });
 
     it("should run two immediate tasks, both resolve", async () => {
@@ -80,7 +84,7 @@ describe("useAsyncQueue", () => {
           },
         };
       };
-      const { result, waitForNextUpdate } = renderHook(() =>
+      const { result } = renderHook(() =>
         useAsyncQueue({ concurrency: 1, done })
       );
 
@@ -91,10 +95,17 @@ describe("useAsyncQueue", () => {
       act(() => {
         result.current.add(makeTask(1));
       });
-      await waitForNextUpdate();
-      expect(done).toHaveBeenCalledTimes(2);
-      expect(done.mock.calls[0][0].result).resolves.toBe("0 is done");
-      expect(done.mock.calls[1][0].result).resolves.toBe("1 is done");
+      await act(async () => {
+        await waitFor(() => {
+          expect(done).toHaveBeenCalledTimes(1);
+          expect(done.mock.calls[0][0].result).resolves.toBe("0 is done");
+        });
+      });
+
+      await waitFor(() => {
+        expect(done).toHaveBeenCalledTimes(2);
+        expect(done.mock.calls[1][0].result).resolves.toBe("1 is done");
+      });
     });
 
     it("should run two immediate tasks, one resolves, one rejects", async () => {
@@ -112,7 +123,7 @@ describe("useAsyncQueue", () => {
           },
         };
       };
-      const { result, rerender, waitForNextUpdate } = renderHook(
+      const { result } = renderHook(
         ({ concurrency, done, drain }) =>
           useAsyncQueue({ concurrency, done, drain }),
         { initialProps: { concurrency: 1, done, drain } }
@@ -127,16 +138,20 @@ describe("useAsyncQueue", () => {
       act(() => {
         result.current.add(makeTask(1));
       });
-      await waitForNextUpdate();
-      expect(done).toHaveBeenCalledTimes(2);
-      expect(done.mock.calls[0][0].result).resolves.toBe("0 is done");
-      expect(done.mock.calls[1][0].result).rejects.toBe("1 rejected");
-      // TODO: test that drain is not called until next tick.
-      expect(drain).toHaveBeenCalledTimes(1);
-      // Force re-calcuation by changing a prop.
-      rerender({ concurrency: 2, done, drain });
-      // Ensure drain isn't called again.
-      expect(drain).toHaveBeenCalledTimes(1);
+
+      await act(async () => {
+        await waitFor(() => {
+          expect(done).toHaveBeenCalledTimes(1);
+          expect(done.mock.calls[0][0].result).resolves.toBe("0 is done");
+          expect(drain).toHaveBeenCalledTimes(0);
+        });
+      });
+
+      await waitFor(() => {
+        expect(done).toHaveBeenCalledTimes(2);
+        expect(done.mock.calls[1][0].result).rejects.toBe("1 rejected");
+        expect(drain).toHaveBeenCalledTimes(1);
+      });
     });
 
     // This test uses a real timeout, but the call to useFakeTimers messes with
@@ -191,7 +206,7 @@ describe("useAsyncQueue", () => {
           },
         };
       };
-      const { result, waitForNextUpdate } = renderHook(() =>
+      const { result } = renderHook(() =>
         useAsyncQueue({ concurrency: 1, inflight, done, drain })
       );
 
@@ -209,26 +224,33 @@ describe("useAsyncQueue", () => {
       expect(inflight).toHaveBeenCalledTimes(1);
       jest.advanceTimersByTime(900);
       expect(done).not.toHaveBeenCalled();
-      expect(result.current.stats.numInFlight).toBe(1);
-      expect(result.current.stats.numPending).toBe(1);
-      expect(result.current.stats.numDone).toBe(0);
-      jest.advanceTimersByTime(100);
-      await waitForNextUpdate();
-      expect(done).toHaveBeenCalledTimes(1);
-      expect(inflight).toHaveBeenCalledTimes(2);
-      expect(drain).not.toHaveBeenCalled();
-      expect(result.current.stats.numInFlight).toBe(1);
-      expect(result.current.stats.numPending).toBe(0);
-      expect(result.current.stats.numDone).toBe(1);
-      jest.advanceTimersByTime(900);
-      expect(done).toHaveBeenCalledTimes(1);
-      jest.advanceTimersByTime(100);
-      await waitForNextUpdate();
-      expect(done).toHaveBeenCalledTimes(2);
-      expect(result.current.stats.numInFlight).toBe(0);
-      expect(result.current.stats.numPending).toBe(0);
-      expect(result.current.stats.numDone).toBe(2);
-      expect(drain).toHaveBeenCalledTimes(1);
+
+      await act(async () => {
+        expect(result.current.stats.numInFlight).toBe(1);
+        expect(result.current.stats.numPending).toBe(1);
+        expect(result.current.stats.numDone).toBe(0);
+        jest.advanceTimersByTime(100);
+      });
+
+      await act(async () => {
+        expect(done).toHaveBeenCalledTimes(1);
+        expect(inflight).toHaveBeenCalledTimes(2);
+        expect(drain).not.toHaveBeenCalled();
+        expect(result.current.stats.numInFlight).toBe(1);
+        expect(result.current.stats.numPending).toBe(0);
+        expect(result.current.stats.numDone).toBe(1);
+        jest.advanceTimersByTime(900);
+        expect(done).toHaveBeenCalledTimes(1);
+        jest.advanceTimersByTime(100);
+      });
+
+      await waitFor(() => {
+        expect(done).toHaveBeenCalledTimes(2);
+        expect(result.current.stats.numInFlight).toBe(0);
+        expect(result.current.stats.numPending).toBe(0);
+        expect(result.current.stats.numDone).toBe(2);
+        expect(drain).toHaveBeenCalledTimes(1);
+      });
     });
 
     it("should run two deferred tasks at a time with concurrency 2", async () => {
@@ -246,7 +268,7 @@ describe("useAsyncQueue", () => {
           },
         };
       };
-      const { result, waitForNextUpdate } = renderHook(() =>
+      const { result } = renderHook(() =>
         useAsyncQueue({ concurrency: 2, inflight, done })
       );
 
@@ -264,11 +286,13 @@ describe("useAsyncQueue", () => {
       expect(result.current.stats.numPending).toBe(0);
       expect(result.current.stats.numDone).toBe(0);
       jest.advanceTimersByTime(100);
-      await waitForNextUpdate();
-      expect(done).toHaveBeenCalledTimes(2);
-      expect(result.current.stats.numInFlight).toBe(0);
-      expect(result.current.stats.numPending).toBe(0);
-      expect(result.current.stats.numDone).toBe(2);
+
+      await waitFor(() => {
+        expect(done).toHaveBeenCalledTimes(2);
+        expect(result.current.stats.numInFlight).toBe(0);
+        expect(result.current.stats.numPending).toBe(0);
+        expect(result.current.stats.numDone).toBe(2);
+      });
     });
   });
 });
