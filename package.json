@@ -28,8 +28,9 @@
     "test": "jest --config=jest.config.js"
   },
   "devDependencies": {
-    "@babel/core": "7.9.0",
-    "@babel/preset-env": "7.9.5",
+    "@babel/core": "7.26.0",
+    "@babel/preset-env": "7.26.0",
+    "@babel/preset-react": "7.25.9",
     "@testing-library/dom": "10.4.0",
     "@testing-library/react": "16.0.1",
     "@types/jest": "25.2.3",
@@ -37,7 +38,7 @@
     "@types/react": "18.3.12",
     "@typescript-eslint/eslint-plugin": "5.5.0",
     "@typescript-eslint/parser": "5.5.0",
-    "babel-jest": "25.3.0",
+    "babel-jest": "29.7.0",
     "eslint": "8.57.1",
     "eslint-config-prettier": "8.10.0",
     "eslint-plugin-jest": "23.8.2",
