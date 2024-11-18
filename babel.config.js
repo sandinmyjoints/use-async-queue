@@ -9,5 +9,6 @@ module.exports = {
         },
       },
     ],
+    ["@babel/preset-react", { development: true, runtime: "automatic" }],
   ],
 };
