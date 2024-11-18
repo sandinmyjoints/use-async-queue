@@ -1,7 +1,9 @@
-import { renderHook, waitFor } from "@testing-library/react";
+import "@testing-library/jest-dom";
+import { renderHook, waitFor, render, screen } from "@testing-library/react";
 import { StrictMode } from "react";
 import { act } from "react";
 import useAsyncQueue from "./dist/use-async-queue";
+import { Component } from "./component";
 
 describe("useAsyncQueue", () => {
   describe("real timers", () => {
@@ -279,19 +281,41 @@ describe("useAsyncQueue", () => {
       expect(result.current.stats.numInFlight).toBe(2);
       expect(inflight).toHaveBeenCalledTimes(2);
       expect(done).toHaveBeenCalledTimes(0);
+
       jest.advanceTimersByTime(900);
       expect(done).not.toHaveBeenCalled();
       expect(result.current.stats.numInFlight).toBe(2);
       expect(result.current.stats.numPending).toBe(0);
       expect(result.current.stats.numDone).toBe(0);
-      jest.advanceTimersByTime(100);
 
+      jest.advanceTimersByTime(100);
       await waitFor(() => {
         expect(done).toHaveBeenCalledTimes(2);
         expect(result.current.stats.numInFlight).toBe(0);
         expect(result.current.stats.numPending).toBe(0);
         expect(result.current.stats.numDone).toBe(2);
       });
+    });
+  });
+
+  describe("on mount", () => {
+    it("should execute each task once", async () => {
+      render(<Component />, {
+        wrapper: StrictMode,
+      });
+
+      expect(screen.getByText("total: 3"));
+      await waitFor(() => {
+        expect(screen.queryAllByText(/item done/)).toHaveLength(1);
+      });
+      await waitFor(() => {
+        expect(screen.queryAllByText(/item done/)).toHaveLength(2);
+      });
+      await waitFor(() => {
+        expect(screen.queryAllByText(/item done/)).toHaveLength(3);
+      });
+      expect(screen.queryAllByText(/item done/)).not.toHaveLength(4);
+      expect(screen.getByText("total: 3"));
     });
   });
 });
