@@ -14,7 +14,7 @@ const makeTask = (id, delay) => {
   };
 };
 
-export const Component = () => {
+export const Component = ({ items }) => {
   const [doneItems, setDoneItems] = useState([]);
 
   const done = (d) => {
@@ -24,10 +24,8 @@ export const Component = () => {
   const { add, stats } = useAsyncQueue({ concurrency: 2, done });
 
   useEffect(() => {
-    add(makeTask(1, 100));
-    add(makeTask(2, 200));
-    add(makeTask(3, 300));
-  }, [add]);
+    items.forEach((item) => add(makeTask(item.id, item.delay)));
+  }, [items, add]);
   const { numPending, numInFlight, numDone } = stats;
 
   return (

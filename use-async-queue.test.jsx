@@ -300,9 +300,18 @@ describe("useAsyncQueue", () => {
 
   describe("on mount", () => {
     it("should execute each task once", async () => {
-      render(<Component />, {
-        wrapper: StrictMode,
-      });
+      render(
+        <Component
+          items={[
+            { id: 1, delay: 100 },
+            { id: 2, delay: 200 },
+            { id: 3, delay: 300 },
+          ]}
+        />,
+        {
+          wrapper: StrictMode,
+        }
+      );
 
       expect(screen.getByText("total: 3"));
       await waitFor(() => {
