@@ -11,9 +11,11 @@ Inspired by
 - Create a queue with some concurrency. Default concurrency is 8. Set to
   `Infinity` or less than 1 for no concurrency limit.
 - Register for notifications as tasks are processed and finished.
-- Add tasks to it. A task is an object with an `id` (some unique value that
-  makes sense for your use case -- a number, a url, etc.) and a `task` (a
-  function that returns a Promise).
+- Add tasks to it. A task is an object with an `id` (some unique primitive
+  value that makes sense for your use case -- a number, a url, etc.) and a
+  `task` (a function that returns a Promise).
+  - If `add` is called with a task that has an `id` equal to the `id` of a
+    pending or in-flight tasks, it will not be added to the queue.
 - **Demo: https://codesandbox.io/s/use-async-queue-demo-53y89**
 
 ```javascript
