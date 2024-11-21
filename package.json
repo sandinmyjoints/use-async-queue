@@ -3,7 +3,14 @@
   "version": "2.1.5",
   "source": "use-async-queue.ts",
   "main": "dist/use-async-queue.js",
+  "exports": {
+    "types": "./dist/use-async-queue.d.ts",
+    "require": "./dist/use-async-queue.js",
+    "default": "./dist/use-async-queue.modern.mjs"
+  },
+  "types": "dist/use-async-queue.d.ts",
   "module": "dist/use-async-queue.module.js",
+  "unpkg": "dist/use-async-queue.umd.js",
   "author": "William Bert <william.bert@gmail.com>",
   "url": "https://github.com/sandinmyjoints/use-async-queue",
   "homepage": "https://github.com/sandinmyjoints/use-async-queue",
