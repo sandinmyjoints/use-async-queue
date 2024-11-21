@@ -4,3 +4,7 @@ local*
 *.el
 .rts*
 TAGS
+
+.nvmrc
+.envrc
+.yarn
