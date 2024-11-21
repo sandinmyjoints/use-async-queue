@@ -71,5 +71,6 @@
   "prettier": {
     "trailingComma": "es5",
     "arrowParens": "always"
-  }
+  },
+  "packageManager": "yarn@4.5.1"
 }
