@@ -1,6 +1,6 @@
 {
   "name": "use-async-queue",
-  "version": "2.1.5",
+  "version": "3.0.0",
   "source": "use-async-queue.ts",
   "main": "dist/use-async-queue.js",
   "exports": {
