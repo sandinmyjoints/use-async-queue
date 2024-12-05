@@ -7,7 +7,7 @@ interface QueueStats {
   numDone: number;
 }
 
-interface QueueTaskResult {
+export interface QueueTaskResult {
   id: unknown;
   task(): Promise<unknown>;
   result?: Promise<unknown>;
